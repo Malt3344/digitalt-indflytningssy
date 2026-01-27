@@ -217,7 +217,7 @@ export default function RoomInspection({ data, onNext, onBack }: RoomInspectionP
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Stand
                       </label>
-                      <div className="grid grid-cols-3 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         {(['Perfekt', 'Brugsspor', 'Skal udbedres'] as RoomCondition[]).map(
                           (condition) => (
                             <button
@@ -226,7 +226,7 @@ export default function RoomInspection({ data, onNext, onBack }: RoomInspectionP
                               onClick={() =>
                                 updateNote(room.id, note.id, 'condition', condition)
                               }
-                              className={`py-3 px-4 rounded-lg font-medium transition-colors ${
+                              className={`py-3 px-4 rounded-lg font-medium transition-colors text-sm whitespace-nowrap ${
                                 note.condition === condition
                                   ? 'bg-primary-600 text-white'
                                   : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
