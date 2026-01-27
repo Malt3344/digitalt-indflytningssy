@@ -19,10 +19,23 @@ export default function Signature({ data, onNext, onBack }: SignatureProps) {
   const [landlordPad, setLandlordPad] = useState<SignaturePad | null>(null)
   const [tenantPad, setTenantPad] = useState<SignaturePad | null>(null)
 
+  const resizeCanvas = (canvas: HTMLCanvasElement) => {
+    const ratio = Math.max(window.devicePixelRatio || 1, 1)
+    const rect = canvas.getBoundingClientRect()
+    canvas.width = rect.width * ratio
+    canvas.height = rect.height * ratio
+    const ctx = canvas.getContext('2d')
+    if (ctx) {
+      ctx.scale(ratio, ratio)
+    }
+  }
+
   useEffect(() => {
     if (landlordCanvasRef.current) {
+      resizeCanvas(landlordCanvasRef.current)
       const pad = new SignaturePad(landlordCanvasRef.current, {
         backgroundColor: 'rgb(255, 255, 255)',
+        penColor: 'rgb(0, 0, 0)',
       })
       setLandlordPad(pad)
       if (data.landlordSignature) {
@@ -31,8 +44,10 @@ export default function Signature({ data, onNext, onBack }: SignatureProps) {
     }
 
     if (tenantCanvasRef.current) {
+      resizeCanvas(tenantCanvasRef.current)
       const pad = new SignaturePad(tenantCanvasRef.current, {
         backgroundColor: 'rgb(255, 255, 255)',
+        penColor: 'rgb(0, 0, 0)',
       })
       setTenantPad(pad)
       if (data.tenantSignature) {
@@ -40,7 +55,23 @@ export default function Signature({ data, onNext, onBack }: SignatureProps) {
       }
     }
 
+    const handleResize = () => {
+      if (landlordCanvasRef.current && landlordPad) {
+        const data = landlordPad.toDataURL()
+        resizeCanvas(landlordCanvasRef.current)
+        landlordPad.fromDataURL(data)
+      }
+      if (tenantCanvasRef.current && tenantPad) {
+        const data = tenantPad.toDataURL()
+        resizeCanvas(tenantCanvasRef.current)
+        tenantPad.fromDataURL(data)
+      }
+    }
+
+    window.addEventListener('resize', handleResize)
+
     return () => {
+      window.removeEventListener('resize', handleResize)
       landlordPad?.off()
       tenantPad?.off()
     }
@@ -84,12 +115,11 @@ export default function Signature({ data, onNext, onBack }: SignatureProps) {
                 Ryd
               </button>
             </div>
-            <div className="border-2 border-gray-300 rounded-lg overflow-hidden">
+            <div className="border-2 border-gray-300 rounded-lg overflow-hidden bg-white">
               <canvas
                 ref={landlordCanvasRef}
-                className="w-full touch-none"
-                width={800}
-                height={200}
+                className="w-full touch-none cursor-crosshair"
+                style={{ height: '200px' }}
               />
             </div>
             <p className="text-sm text-gray-500 mt-2">
@@ -110,12 +140,11 @@ export default function Signature({ data, onNext, onBack }: SignatureProps) {
                 Ryd
               </button>
             </div>
-            <div className="border-2 border-gray-300 rounded-lg overflow-hidden">
+            <div className="border-2 border-gray-300 rounded-lg overflow-hidden bg-white">
               <canvas
                 ref={tenantCanvasRef}
-                className="w-full touch-none"
-                width={800}
-                height={200}
+                className="w-full touch-none cursor-crosshair"
+                style={{ height: '200px' }}
               />
             </div>
             <p className="text-sm text-gray-500 mt-2">
