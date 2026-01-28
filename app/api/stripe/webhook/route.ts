@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import { stripe } from '@/lib/stripe'
-import { createClient } from '@supabase/supabase-js'
+import { createAdminSupabase } from '@/lib/supabase-server'
 import Stripe from 'stripe'
 
-// Use service role key for webhook to bypass RLS
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
 export async function POST(req: NextRequest) {
+  // Create admin client inside the handler to avoid build-time initialization
+  const supabaseAdmin = createAdminSupabase()
+  
   const body = await req.text()
   const headersList = await headers()
   const signature = headersList.get('stripe-signature')!
@@ -41,7 +38,7 @@ export async function POST(req: NextRequest) {
 
         // Handle subscription checkout
         if (userId && session.subscription) {
-          await supabaseAdmin
+          await (supabaseAdmin as any)
             .from('user_profiles')
             .update({
               stripe_subscription_id: session.subscription as string,
@@ -71,7 +68,7 @@ export async function POST(req: NextRequest) {
         const periodEnd = (subscription as any).current_period_end
 
         if (userId) {
-          await supabaseAdmin
+          await (supabaseAdmin as any)
             .from('user_profiles')
             .update({
               subscription_status: subscription.status as any,
@@ -89,7 +86,7 @@ export async function POST(req: NextRequest) {
         const userId = subscription.metadata?.supabase_user_id
 
         if (userId) {
-          await supabaseAdmin
+          await (supabaseAdmin as any)
             .from('user_profiles')
             .update({
               subscription_status: 'canceled',
@@ -110,7 +107,7 @@ export async function POST(req: NextRequest) {
           const userId = subscription.metadata?.supabase_user_id
 
           if (userId) {
-            await supabaseAdmin
+            await (supabaseAdmin as any)
               .from('user_profiles')
               .update({
                 subscription_status: 'past_due' as any,
