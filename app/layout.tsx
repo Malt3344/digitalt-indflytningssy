@@ -1,19 +1,32 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import CookieConsent from "@/components/CookieConsent";
 
 const inter = Inter({ subsets: ["latin"] });
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: '#000000',
+}
+
 export const metadata: Metadata = {
-  title: "Digitalt Indflytningssyn",
-  description: "Professionel digital løsning til indflytningssyn i Danmark",
+  title: "SynsApp - Digitalt Indflytningssyn",
+  description: "Lav professionelle indflytningssyn på 5 minutter. Tag fotos, få digital underskrift og download PDF-rapport. Første syn er gratis!",
   manifest: "/manifest.json",
-  themeColor: "#0ea5e9",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Indflytningssyn",
+    title: "SynsApp",
+  },
+  openGraph: {
+    title: "SynsApp - Digitalt Indflytningssyn",
+    description: "Lav professionelle indflytningssyn på 5 minutter. Første syn er gratis!",
+    type: "website",
+    locale: "da_DK",
   },
 };
 
@@ -25,12 +38,14 @@ export default function RootLayout({
   return (
     <html lang="da">
       <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/icon-192x192.png" />
       </head>
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        {children}
+        <CookieConsent />
+      </body>
     </html>
   );
 }

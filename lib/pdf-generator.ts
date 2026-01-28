@@ -6,15 +6,15 @@ interface InspectionData {
   tenant_name: string
   address: string
   inspection_date: string
-  landlord_signature: string
-  tenant_signature: string
+  landlord_signature?: string
+  tenant_signature?: string
   el_meter_no?: string
   el_reading?: number
   water_reading?: number
   heat_reading?: number
   key_count?: number
   key_notes?: string
-  rooms: Array<{
+  rooms?: Array<{
     room_name: string
     condition: string
     description: string
@@ -154,23 +154,24 @@ export async function generatePDF(inspection: InspectionData) {
   }
 
   // ===== ROOMS =====
-  checkPageBreak(20)
-  doc.setFontSize(16)
-  doc.setFont('helvetica', 'bold')
-  doc.setTextColor(0, 0, 0)
-  doc.text('Rum-for-Rum Inspektion', margin, yPosition)
-  yPosition += 10
+  if (inspection.rooms && inspection.rooms.length > 0) {
+    checkPageBreak(20)
+    doc.setFontSize(16)
+    doc.setFont('helvetica', 'bold')
+    doc.setTextColor(0, 0, 0)
+    doc.text('Rum-for-Rum Inspektion', margin, yPosition)
+    yPosition += 10
 
-  // Group rooms by name
-  const roomGroups: { [key: string]: typeof inspection.rooms } = {}
-  inspection.rooms.forEach(room => {
-    if (!roomGroups[room.room_name]) {
-      roomGroups[room.room_name] = []
-    }
-    roomGroups[room.room_name].push(room)
-  })
+    // Group rooms by name
+    const roomGroups: { [key: string]: NonNullable<typeof inspection.rooms> } = {}
+    inspection.rooms.forEach(room => {
+      if (!roomGroups[room.room_name]) {
+        roomGroups[room.room_name] = []
+      }
+      roomGroups[room.room_name]!.push(room)
+    })
 
-  for (const [roomName, roomEntries] of Object.entries(roomGroups)) {
+    for (const [roomName, roomEntries] of Object.entries(roomGroups)) {
     checkPageBreak(25)
 
     // Room header
@@ -253,6 +254,7 @@ export async function generatePDF(inspection: InspectionData) {
 
     yPosition += 3
   }
+  } // End of rooms section
 
   // ===== SIGNATURES =====
   checkPageBreak(70)

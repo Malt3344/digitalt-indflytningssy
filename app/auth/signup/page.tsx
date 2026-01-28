@@ -52,17 +52,17 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center">
+      <div className="min-h-screen bg-white flex items-center justify-center px-4">
+        <div className="max-w-md w-full text-center px-4">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <UserPlus className="h-8 w-8 text-green-600" />
+            <span className="text-3xl">✓</span>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Konto Oprettet!</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Konto oprettet!</h2>
           <p className="text-gray-600 mb-4">
             Tjek din email for at bekræfte din konto.
           </p>
           <p className="text-sm text-gray-500">
-            Du bliver omdirigeret til login-siden...
+            Du bliver omdirigeret til login...
           </p>
         </div>
       </div>
@@ -70,96 +70,78 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
-      <div className="max-w-md w-full">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+      <div className="max-w-md w-full px-4">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Opret Konto</h1>
-          <p className="text-gray-600">Kom i gang med digitale indflytningssyn</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Opret konto</h1>
+          <p className="text-gray-600 text-sm">Første indflytningssyn er gratis</p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-8">
-          <form onSubmit={handleSignup} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="din@email.dk"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Adgangskode
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="Mindst 6 tegn"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Bekræft Adgangskode
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                <input
-                  type="password"
-                  required
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="Gentag adgangskode"
-                />
-              </div>
-            </div>
-
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                {error}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              {loading ? (
-                'Opretter konto...'
-              ) : (
-                <>
-                  <UserPlus className="h-5 w-5" />
-                  Opret Konto
-                </>
-              )}
-            </button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              Har du allerede en konto?{' '}
-              <a href="/auth/login" className="text-primary-600 hover:text-primary-700 font-medium">
-                Log ind
-              </a>
-            </p>
+        <form onSubmit={handleSignup} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-black"
+              placeholder="din@email.dk"
+            />
           </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Adgangskode
+            </label>
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-black"
+              placeholder="Mindst 6 tegn"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Bekræft adgangskode
+            </label>
+            <input
+              type="password"
+              required
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-black"
+              placeholder="Gentag adgangskode"
+            />
+          </div>
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+              {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-black text-white py-4 rounded-xl font-semibold active:bg-gray-800 disabled:opacity-50 mt-6"
+          >
+            {loading ? 'Opretter konto...' : 'Opret konto'}
+          </button>
+        </form>
+
+        <div className="mt-6 text-center">
+          <p className="text-gray-600 text-sm">
+            Har du allerede en konto?{' '}
+            <a href="/auth/login" className="text-black font-semibold underline">
+              Log ind
+            </a>
+          </p>
         </div>
       </div>
     </div>

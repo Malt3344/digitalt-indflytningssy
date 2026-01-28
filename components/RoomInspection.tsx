@@ -45,6 +45,18 @@ export default function RoomInspection({ data, onNext, onBack }: RoomInspectionP
           },
         ]
   )
+  
+  // Track which rooms have "Andet" selected
+  const [customRooms, setCustomRooms] = useState<Record<string, boolean>>(() => {
+    // Initialize from existing data - if roomName is not in COMMON_ROOMS, it's custom
+    const initial: Record<string, boolean> = {}
+    data.forEach((room) => {
+      if (room.roomName && !COMMON_ROOMS.includes(room.roomName)) {
+        initial[room.id] = true
+      }
+    })
+    return initial
+  })
 
   const addRoom = () => {
     setRooms([
@@ -60,6 +72,10 @@ export default function RoomInspection({ data, onNext, onBack }: RoomInspectionP
   const removeRoom = (roomId: string) => {
     if (rooms.length > 1) {
       setRooms(rooms.filter((room) => room.id !== roomId))
+      // Clean up customRooms state
+      const newCustomRooms = { ...customRooms }
+      delete newCustomRooms[roomId]
+      setCustomRooms(newCustomRooms)
     }
   }
 
@@ -160,9 +176,18 @@ export default function RoomInspection({ data, onNext, onBack }: RoomInspectionP
                   Rum Navn
                 </label>
                 <select
-                  value={room.roomName}
-                  onChange={(e) => updateRoomName(room.id, e.target.value)}
-                  required
+                  value={customRooms[room.id] ? 'Andet' : room.roomName}
+                  onChange={(e) => {
+                    const value = e.target.value
+                    if (value === 'Andet') {
+                      setCustomRooms({ ...customRooms, [room.id]: true })
+                      updateRoomName(room.id, '')
+                    } else {
+                      setCustomRooms({ ...customRooms, [room.id]: false })
+                      updateRoomName(room.id, value)
+                    }
+                  }}
+                  required={!customRooms[room.id]}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 >
                   <option value="">Vælg rum</option>
@@ -175,12 +200,14 @@ export default function RoomInspection({ data, onNext, onBack }: RoomInspectionP
                 </select>
               </div>
 
-              {room.roomName === 'Andet' && (
+              {customRooms[room.id] && (
                 <div className="mb-4">
                   <input
                     type="text"
                     placeholder="Indtast rum navn"
+                    value={room.roomName}
                     onChange={(e) => updateRoomName(room.id, e.target.value)}
+                    required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
                 </div>
