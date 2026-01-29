@@ -1,164 +1,158 @@
 'use client'
 
-import { useState } from 'react'
-import { Check, Loader2 } from 'lucide-react'
-import { STRIPE_PLANS, SubscriptionTier } from '@/lib/stripe-plans'
-import { stripePromise } from '@/lib/stripe-client'
+import Link from 'next/link'
 
 export default function PriserPage() {
-  const [loading, setLoading] = useState<SubscriptionTier | null>(null)
-
-  const handleSubscribe = async (tier: SubscriptionTier) => {
-    try {
-      setLoading(tier)
-      
-      const plan = STRIPE_PLANS[tier]
-      const response = await fetch('/api/stripe/create-checkout-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          priceId: plan.priceId,
-          tier: tier,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Kunne ikke oprette betalingssession')
-      }
-
-      const { sessionId } = await response.json()
-      
-      // Redirect to Stripe Checkout using the session
-      const stripe = await stripePromise
-      if (stripe && sessionId) {
-        // Use the Stripe.js redirectToCheckout method
-        await (stripe as any).redirectToCheckout({ sessionId })
-      }
-    } catch (error) {
-      console.error('Error:', error)
-      alert('Der opstod en fejl. Prøv venligst igen.')
-    } finally {
-      setLoading(null)
-    }
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 to-blue-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Vælg den rigtige plan for dig
-          </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Start med en gratis prøveperiode på 14 dage. Ingen binding, opsig når som helst.
-          </p>
-        </div>
-
-        {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {Object.entries(STRIPE_PLANS).map(([key, plan]) => {
-            const tier = key as SubscriptionTier
-            const isPopular = tier === 'professional'
-            const isLoading = loading === tier
-
-            return (
-              <div
-                key={tier}
-                className={`relative bg-white rounded-2xl shadow-xl overflow-hidden transition-transform hover:scale-105 ${
-                  isPopular ? 'ring-4 ring-sky-500' : ''
-                }`}
-              >
-                {isPopular && (
-                  <div className="absolute top-0 right-0 bg-sky-500 text-white px-4 py-1 rounded-bl-lg text-sm font-semibold">
-                    Mest populær
-                  </div>
-                )}
-
-                <div className="p-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                    {plan.name}
-                  </h3>
-                  <div className="flex items-baseline mb-6">
-                    <span className="text-5xl font-extrabold text-gray-900">
-                      {plan.price}
-                    </span>
-                    <span className="text-xl text-gray-500 ml-2">
-                      kr/{plan.interval}
-                    </span>
-                  </div>
-
-                  <button
-                    onClick={() => handleSubscribe(tier)}
-                    disabled={isLoading}
-                    className={`w-full py-3 px-6 rounded-lg font-semibold text-white transition-colors mb-8 ${
-                      isPopular
-                        ? 'bg-sky-500 hover:bg-sky-600'
-                        : 'bg-gray-800 hover:bg-gray-900'
-                    } disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center`}
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="animate-spin mr-2" size={20} />
-                        Indlæser...
-                      </>
-                    ) : (
-                      'Start gratis prøveperiode'
-                    )}
-                  </button>
-
-                  <ul className="space-y-4">
-                    {plan.features.map((feature, index) => (
-                      <li key={index} className="flex items-start">
-                        <Check
-                          className="text-green-500 mr-3 flex-shrink-0 mt-1"
-                          size={20}
-                        />
-                        <span className="text-gray-700">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <header className="border-b border-gray-100">
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          <nav className="flex items-center justify-between">
+            <Link href="/" className="flex items-center gap-2">
+              <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
               </div>
-            )
-          })}
+              <span className="font-bold text-xl">SynsApp</span>
+            </Link>
+            <Link href="/auth/login" className="text-gray-600 hover:text-black font-medium">
+              Log ind
+            </Link>
+          </nav>
         </div>
+      </header>
 
-        {/* FAQ Section */}
-        <div className="mt-20 max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-10 text-gray-900">
-            Ofte stillede spørgsmål
-          </h2>
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg p-6 shadow-md">
-              <h3 className="font-semibold text-lg mb-2 text-gray-900">
-                Hvordan fungerer prøveperioden?
-              </h3>
-              <p className="text-gray-600">
-                Du kan bruge alle funktioner gratis i 14 dage. Dit kort bliver først trukket efter prøveperioden udløber. Du kan opsige når som helst.
-              </p>
+      <main className="py-16 px-4">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Enkel og fair prissætning
+            </h1>
+            <p className="text-lg text-gray-600 max-w-xl mx-auto">
+              Ingen månedlige gebyrer. Betal kun når du har brug for en rapport.
+            </p>
+          </div>
+
+          {/* Main pricing card */}
+          <div className="max-w-md mx-auto mb-16">
+            <div className="bg-white rounded-2xl border-2 border-black p-8 shadow-sm">
+              <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-3 py-1.5 rounded-full text-sm font-medium mb-6">
+                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                Første syn gratis
+              </div>
+              
+              <div className="mb-6">
+                <span className="text-5xl font-bold text-gray-900">149 kr</span>
+                <span className="text-gray-500 ml-2">per synsrapport</span>
+              </div>
+
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-center gap-3">
+                  <svg className="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-gray-700">Ubegrænset antal rum og fotos</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <svg className="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-gray-700">Digital underskrift inkluderet</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <svg className="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-gray-700">Professionel PDF-rapport</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <svg className="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-gray-700">Arkiveret sikkert i skyen</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <svg className="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-gray-700">Ingen binding eller abonnement</span>
+                </li>
+              </ul>
+
+              <Link
+                href="/auth/signup"
+                className="block w-full bg-black text-white text-center py-4 rounded-xl font-semibold text-lg hover:bg-gray-800 transition-colors"
+              >
+                Start gratis nu
+              </Link>
             </div>
-            <div className="bg-white rounded-lg p-6 shadow-md">
-              <h3 className="font-semibold text-lg mb-2 text-gray-900">
-                Kan jeg skifte plan senere?
-              </h3>
-              <p className="text-gray-600">
-                Ja, du kan opgradere eller nedgradere din plan når som helst fra din konto. Ændringer træder i kraft ved næste faktureringsperiode.
-              </p>
-            </div>
-            <div className="bg-white rounded-lg p-6 shadow-md">
-              <h3 className="font-semibold text-lg mb-2 text-gray-900">
-                Hvad sker der hvis jeg når mit månedlige limit?
-              </h3>
-              <p className="text-gray-600">
-                For Basis-planen vil du blive bedt om at opgradere når du når 10 indflytningssyn. Professional og Virksomhed har ubegrænsede inspektioner.
-              </p>
+          </div>
+
+          {/* FAQ Section */}
+          <div className="max-w-2xl mx-auto">
+            <h2 className="text-2xl font-bold text-center mb-8 text-gray-900">
+              Ofte stillede spørgsmål
+            </h2>
+            <div className="space-y-4">
+              <div className="bg-gray-50 rounded-xl p-5">
+                <h3 className="font-semibold text-gray-900 mb-2">
+                  Hvordan virker &quot;første syn gratis&quot;?
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  Dit allerførste indflytningssyn er helt gratis - inklusiv PDF-rapporten. Derefter koster hver rapport kun 149 kr.
+                </p>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-5">
+                <h3 className="font-semibold text-gray-900 mb-2">
+                  Hvornår betaler jeg?
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  Du betaler først når du vil downloade PDF-rapporten. Du kan oprette og udfylde syn helt gratis.
+                </p>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-5">
+                <h3 className="font-semibold text-gray-900 mb-2">
+                  Er der skjulte gebyrer?
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  Nej. 149 kr per rapport - det er alt. Ingen abonnementer, ingen bindingsperioder, ingen overraskelser.
+                </p>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-5">
+                <h3 className="font-semibold text-gray-900 mb-2">
+                  Hvilke betalingsmetoder accepterer I?
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  Vi accepterer alle større betalingskort via Stripe - Visa, Mastercard, og American Express.
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-gray-100 py-8 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
+                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <span className="font-semibold text-gray-900">SynsApp</span>
+            </div>
+            <div className="flex items-center gap-6">
+              <Link href="/privatlivspolitik" className="hover:text-gray-900 transition-colors">Privatlivspolitik</Link>
+              <Link href="/vilkaar" className="hover:text-gray-900 transition-colors">Handelsbetingelser</Link>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }

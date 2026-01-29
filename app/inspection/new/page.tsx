@@ -291,19 +291,21 @@ export default function NewInspection() {
         )}
 
         {currentStep === 7 && inspectionId && (
-          <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-            <CheckCircle className="mx-auto h-16 w-16 text-green-500 mb-4" />
+          <div className="bg-white rounded-2xl p-6 md:p-8 text-center">
+            <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="h-8 w-8 text-green-600" />
+            </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
               Indflytningssyn fuldført!
             </h2>
-            <p className="text-gray-600 mb-8">
+            <p className="text-gray-500 mb-8">
               {isPaid 
                 ? 'Dit syn er gemt. Du kan nu downloade synsrapporten.' 
                 : 'Dit syn er gemt. Betal 149 kr for at downloade synsrapporten.'
               }
             </p>
 
-            <div className="max-w-md mx-auto space-y-4">
+            <div className="max-w-sm mx-auto space-y-3">
               <DownloadPDFButton 
                 inspectionId={inspectionId}
                 isPaid={isPaid}
@@ -312,7 +314,7 @@ export default function NewInspection() {
 
               <button
                 onClick={() => router.push('/')}
-                className="w-full bg-gray-100 text-gray-700 py-3 px-6 rounded-xl font-semibold active:bg-gray-200"
+                className="w-full border-2 border-gray-200 text-gray-700 py-4 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
               >
                 Tilbage til forsiden
               </button>

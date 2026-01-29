@@ -95,76 +95,76 @@ export default function Signature({ data, onNext, onBack }: SignatureProps) {
 
   return (
     <div className="w-full max-w-4xl mx-auto">
-      <div className="bg-white rounded-xl shadow-lg p-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-6">Digitale Underskrifter</h2>
-        <p className="text-gray-600 mb-8">
+      <div className="bg-white rounded-2xl p-6 md:p-8">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Digitale underskrifter</h2>
+        <p className="text-gray-500 mb-6">
           Begge parter skal underskrive for at afslutte indflytningssynet.
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {/* Landlord Signature */}
           <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-800">Udlejer Underskrift</h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-base font-semibold text-gray-900">Udlejer underskrift</h3>
               <button
                 type="button"
                 onClick={() => landlordPad?.clear()}
-                className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"
+                className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
               >
                 <Eraser className="h-4 w-4" />
                 Ryd
               </button>
             </div>
-            <div className="border-2 border-gray-300 rounded-lg overflow-hidden bg-white">
+            <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
               <canvas
                 ref={landlordCanvasRef}
                 className="w-full touch-none cursor-crosshair"
-                style={{ height: '200px' }}
+                style={{ height: '180px' }}
               />
             </div>
-            <p className="text-sm text-gray-500 mt-2">
+            <p className="text-sm text-gray-400 mt-2">
               Tegn din underskrift med musen eller fingeren
             </p>
           </div>
 
           {/* Tenant Signature */}
           <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-800">Lejer Underskrift</h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-base font-semibold text-gray-900">Lejer underskrift</h3>
               <button
                 type="button"
                 onClick={() => tenantPad?.clear()}
-                className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"
+                className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
               >
                 <Eraser className="h-4 w-4" />
                 Ryd
               </button>
             </div>
-            <div className="border-2 border-gray-300 rounded-lg overflow-hidden bg-white">
+            <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
               <canvas
                 ref={tenantCanvasRef}
                 className="w-full touch-none cursor-crosshair"
-                style={{ height: '200px' }}
+                style={{ height: '180px' }}
               />
             </div>
-            <p className="text-sm text-gray-500 mt-2">
+            <p className="text-sm text-gray-400 mt-2">
               Tegn din underskrift med musen eller fingeren
             </p>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex gap-3 pt-2">
             <button
               type="button"
               onClick={onBack}
-              className="flex-1 bg-gray-200 text-gray-700 py-3 px-6 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
+              className="flex-1 border-2 border-gray-200 text-gray-700 py-4 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
             >
               Tilbage
             </button>
             <button
               type="submit"
-              className="flex-1 bg-primary-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary-700 transition-colors"
+              className="flex-1 bg-black text-white py-4 rounded-xl font-semibold hover:bg-gray-800 transition-colors"
             >
-              Fuldfør Inspektion
+              Fuldfør inspektion
             </button>
           </div>
         </form>

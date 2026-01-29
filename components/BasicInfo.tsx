@@ -22,25 +22,25 @@ export default function BasicInfo({ data, onNext }: BasicInfoProps) {
 
   return (
     <div className="w-full max-w-2xl mx-auto">
-      <div className="bg-white rounded-xl shadow-lg p-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-6">Grundlæggende Information</h2>
-        <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="bg-white rounded-2xl p-6 md:p-8">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Grundlæggende information</h2>
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Lejer Navn
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Lejer navn
             </label>
             <input
               type="text"
               required
               value={formData.tenantName}
               onChange={(e) => setFormData({ ...formData, tenantName: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900 transition-colors"
               placeholder="Indtast lejer navn"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Adresse
             </label>
             <input
@@ -48,14 +48,14 @@ export default function BasicInfo({ data, onNext }: BasicInfoProps) {
               required
               value={formData.address}
               onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900 transition-colors"
               placeholder="Vejnavn 123, 1234 København"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Dato for Indflytningssyn
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Dato for indflytningssyn
             </label>
             <div className="relative">
               <input
@@ -63,7 +63,7 @@ export default function BasicInfo({ data, onNext }: BasicInfoProps) {
                 required
                 value={formData.inspectionDate}
                 onChange={(e) => setFormData({ ...formData, inspectionDate: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900 transition-colors"
               />
               <Calendar className="absolute right-3 top-3 h-6 w-6 text-gray-400 pointer-events-none" />
             </div>
@@ -71,7 +71,7 @@ export default function BasicInfo({ data, onNext }: BasicInfoProps) {
 
           <button
             type="submit"
-            className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary-700 transition-colors"
+            className="w-full bg-black text-white py-4 rounded-xl font-semibold hover:bg-gray-800 active:bg-gray-900 transition-colors mt-2"
           >
             Næste
           </button>
