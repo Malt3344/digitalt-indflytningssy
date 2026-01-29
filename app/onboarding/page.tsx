@@ -117,7 +117,7 @@ const steps = [
             <div>
               <div className="font-semibold text-gray-900">Vælg tilstand</div>
               <div className="text-sm text-gray-600">
-                Marker rummet som: Perfekt, Brugsspor eller Skal udbedres
+                Marker rummet som: Perfekt, Brugsspor eller Mangel
               </div>
             </div>
           </li>

@@ -205,7 +205,7 @@ export async function generatePDF(inspection: InspectionData) {
       const conditionColors: { [key: string]: [number, number, number] } = {
         'Perfekt': [34, 197, 94],
         'Brugsspor': [251, 191, 36],
-        'Skal udbedres': [239, 68, 68]
+        'Mangel': [239, 68, 68]
       }
       const color = conditionColors[room.condition] || [0, 0, 0]
       doc.setTextColor(...color)

@@ -259,7 +259,7 @@ export default function Home() {
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900 mb-1">Gennemgå hvert rum</h3>
-                <p className="text-gray-600">Tag fotos og beskriv tilstanden for hvert rum. Vælg mellem "Perfekt", "Brugsspor" eller "Skal udbedres".</p>
+                <p className="text-gray-600">Tag fotos og beskriv tilstanden for hvert rum. Vælg mellem "Perfekt", "Brugsspor" eller "Mangel".</p>
               </div>
             </div>
 

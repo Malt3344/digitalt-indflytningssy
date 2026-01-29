@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { Trash2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { generatePDF } from '@/lib/pdf-generator'
 import DownloadPDFButton from '@/components/DownloadPDFButton'
@@ -90,6 +91,35 @@ export default function InspectionDetailPage() {
     }
   }
 
+  const handleDelete = async () => {
+    if (!inspection) return
+    
+    const confirmed = window.confirm('Er du sikker på, at du vil slette dette indflytningssyn? Denne handling kan ikke fortrydes.')
+    
+    if (!confirmed) return
+
+    try {
+      // Delete rooms (and their photos cascade) first
+      await supabase
+        .from('rooms')
+        .delete()
+        .eq('inspection_id', inspection.id)
+
+      // Delete the inspection
+      const { error } = await supabase
+        .from('inspections')
+        .delete()
+        .eq('id', inspection.id)
+
+      if (error) throw error
+
+      router.push('/')
+    } catch (error) {
+      console.error('Error deleting inspection:', error)
+      alert('Der opstod en fejl ved sletning')
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
@@ -148,7 +178,7 @@ export default function InspectionDetailPage() {
           </p>
         </div>
 
-        {/* Info cards */}
+        {/* Info cards - simplified view */}
         <div className="space-y-4 mb-8">
           <div className="bg-gray-50 rounded-xl p-4">
             <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
@@ -156,46 +186,6 @@ export default function InspectionDetailPage() {
             </h3>
             <p className="text-gray-900 font-medium">{inspection.tenant_name || '-'}</p>
           </div>
-
-          {(inspection.el_reading || inspection.water_reading || inspection.heat_reading) && (
-            <div className="bg-gray-50 rounded-xl p-4">
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                Målerstande
-              </h3>
-              <div className="grid grid-cols-3 gap-4 text-sm">
-                {inspection.el_reading && (
-                  <div>
-                    <p className="text-gray-500">El</p>
-                    <p className="font-medium">{inspection.el_reading}</p>
-                  </div>
-                )}
-                {inspection.water_reading && (
-                  <div>
-                    <p className="text-gray-500">Vand</p>
-                    <p className="font-medium">{inspection.water_reading}</p>
-                  </div>
-                )}
-                {inspection.heat_reading && (
-                  <div>
-                    <p className="text-gray-500">Varme</p>
-                    <p className="font-medium">{inspection.heat_reading}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {inspection.key_count && (
-            <div className="bg-gray-50 rounded-xl p-4">
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                Nøgler
-              </h3>
-              <p className="text-gray-900 font-medium">{inspection.key_count} stk.</p>
-              {inspection.key_notes && (
-                <p className="text-gray-600 text-sm mt-1">{inspection.key_notes}</p>
-              )}
-            </div>
-          )}
 
           {/* Signatures */}
           <div className="bg-gray-50 rounded-xl p-4">
@@ -222,39 +212,31 @@ export default function InspectionDetailPage() {
             </div>
           </div>
 
-          {/* Rooms */}
-          {inspection.rooms && inspection.rooms.length > 0 && (
-            <div className="bg-gray-50 rounded-xl p-4">
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
-                Rum ({inspection.rooms.length})
-              </h3>
-              <div className="space-y-2">
-                {inspection.rooms.map((room: any, index: number) => (
-                  <div key={room.id || index} className="flex items-center justify-between text-sm">
-                    <span className="text-gray-900">{room.room_name}</span>
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                      room.condition === 'Perfekt' ? 'bg-green-100 text-green-700' :
-                      room.condition === 'Brugsspor' ? 'bg-yellow-100 text-yellow-700' :
-                      'bg-red-100 text-red-700'
-                    }`}>
-                      {room.condition}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          {/* Legal reference */}
+          <p className="text-xs text-gray-400 text-center">
+            Indflytningssyn jf. lejelovens § 9
+          </p>
         </div>
 
-        {/* Edit button - show if missing signatures */}
-        {(!inspection.landlord_signature || !inspection.tenant_signature) && (
+        {/* Action buttons */}
+        <div className="space-y-3 mb-4">
+          {/* Edit button - always show */}
           <button
             onClick={() => router.push(`/inspection/${inspection.id}/edit`)}
-            className="w-full border-2 border-gray-200 text-gray-700 py-4 rounded-xl font-semibold hover:bg-gray-50 transition-colors mb-4"
+            className="w-full border-2 border-gray-200 text-gray-700 py-4 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
           >
             Rediger syn
           </button>
-        )}
+
+          {/* Delete button */}
+          <button
+            onClick={handleDelete}
+            className="w-full flex items-center justify-center gap-2 text-red-600 py-3 rounded-xl font-medium hover:bg-red-50 transition-colors"
+          >
+            <Trash2 className="h-4 w-4" />
+            Slet syn
+          </button>
+        </div>
 
         {/* Download button */}
         <DownloadPDFButton

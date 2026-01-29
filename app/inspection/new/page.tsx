@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { CheckCircle } from 'lucide-react'
 import BasicInfo from '@/components/BasicInfo'
 import RoomInspection, { RoomData } from '@/components/RoomInspection'
-import PhotoUpload from '@/components/PhotoUpload'
 import MeterReadings from '@/components/MeterReadings'
 import Keys from '@/components/Keys'
 import Signature from '@/components/Signature'
@@ -13,7 +12,7 @@ import DownloadPDFButton from '@/components/DownloadPDFButton'
 import { supabase } from '@/lib/supabase'
 import { generatePDF } from '@/lib/pdf-generator'
 
-type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7
+type Step = 1 | 2 | 3 | 4 | 5 | 6
 
 export default function NewInspection() {
   const router = useRouter()
@@ -30,7 +29,6 @@ export default function NewInspection() {
     inspectionDate: new Date().toISOString().split('T')[0],
   })
   const [rooms, setRooms] = useState<RoomData[]>([])
-  const [photos, setPhotos] = useState<{ [roomId: string]: string[] }>({})
   const [meterReadings, setMeterReadings] = useState({
     elMeterNo: '',
     elReading: '',
@@ -74,19 +72,14 @@ export default function NewInspection() {
     setCurrentStep(3)
   }
 
-  const handlePhotosNext = (photoData: { [roomId: string]: string[] }) => {
-    setPhotos(photoData)
-    setCurrentStep(4)
-  }
-
   const handleMeterReadingsNext = (data: typeof meterReadings) => {
     setMeterReadings(data)
-    setCurrentStep(5)
+    setCurrentStep(4)
   }
 
   const handleKeysNext = (data: typeof keys) => {
     setKeys(data)
-    setCurrentStep(6)
+    setCurrentStep(5)
   }
 
   const handleSignaturesNext = async (signatureData: typeof signatures) => {
@@ -141,7 +134,7 @@ export default function NewInspection() {
 
       console.log('Created inspection:', inspection)
 
-      // Create rooms with their notes
+      // Create rooms with their notes and photos
       for (const room of rooms) {
         for (const note of room.notes) {
           const { data: roomData, error: roomError } = await (supabase as any)
@@ -157,20 +150,21 @@ export default function NewInspection() {
 
           if (roomError) throw roomError
 
-          // Create photos for this room
-          const roomPhotos = photos[room.id] || []
-          for (const photoUrl of roomPhotos) {
-            await (supabase as any).from('photos').insert({
-              room_id: roomData.id,
-              url: photoUrl,
-            })
+          // Create photos for this note (photos are now stored per note)
+          if (note.photos && note.photos.length > 0) {
+            for (const photoUrl of note.photos) {
+              await (supabase as any).from('photos').insert({
+                room_id: roomData.id,
+                url: photoUrl,
+              })
+            }
           }
         }
       }
 
       setInspectionId(inspection.id)
       setIsPaid(isFirstInspection)
-      setCurrentStep(7)
+      setCurrentStep(6)
     } catch (error) {
       console.error('Error saving inspection:', error)
       alert('Der opstod en fejl ved gemning af inspektionen')
@@ -199,7 +193,7 @@ export default function NewInspection() {
     }
   }
 
-  const stepLabels = ['Grundinfo', 'Rum', 'Billeder', 'Målere', 'Nøgler', 'Underskrifter']
+  const stepLabels = ['Grundinfo', 'Rum & Billeder', 'Målere', 'Nøgler', 'Underskrifter']
 
   return (
     <div className="min-h-screen bg-white py-6 px-4 pb-24">
@@ -209,7 +203,8 @@ export default function NewInspection() {
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
             Nyt indflytningssyn
           </h1>
-          {isFirstInspection && currentStep < 7 && (
+          <p className="text-xs text-gray-400 mb-2">jf. lejelovens § 9</p>
+          {isFirstInspection && currentStep < 6 && (
             <span className="inline-block bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-medium">
               🎉 Dette syn er gratis
             </span>
@@ -217,7 +212,7 @@ export default function NewInspection() {
         </div>
 
         {/* Progress Bar */}
-        {currentStep < 7 && (
+        {currentStep < 6 && (
           <div className="mb-6">
             <div className="flex justify-between mb-2">
               {stepLabels.map((label, index) => (
@@ -238,7 +233,7 @@ export default function NewInspection() {
             <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
               <div
                 className="h-full bg-black transition-all duration-300"
-                style={{ width: `${(currentStep / 6) * 100}%` }}
+                style={{ width: `${(currentStep / 5) * 100}%` }}
               />
             </div>
           </div>
@@ -258,39 +253,30 @@ export default function NewInspection() {
         )}
 
         {currentStep === 3 && (
-          <PhotoUpload
-            rooms={rooms}
-            data={photos}
-            onNext={handlePhotosNext}
+          <MeterReadings
+            data={meterReadings}
+            onNext={handleMeterReadingsNext}
             onBack={() => setCurrentStep(2)}
           />
         )}
 
         {currentStep === 4 && (
-          <MeterReadings
-            data={meterReadings}
-            onNext={handleMeterReadingsNext}
+          <Keys
+            data={keys}
+            onNext={handleKeysNext}
             onBack={() => setCurrentStep(3)}
           />
         )}
 
         {currentStep === 5 && (
-          <Keys
-            data={keys}
-            onNext={handleKeysNext}
+          <Signature
+            data={signatures}
+            onNext={handleSignaturesNext}
             onBack={() => setCurrentStep(4)}
           />
         )}
 
-        {currentStep === 6 && (
-          <Signature
-            data={signatures}
-            onNext={handleSignaturesNext}
-            onBack={() => setCurrentStep(5)}
-          />
-        )}
-
-        {currentStep === 7 && inspectionId && (
+        {currentStep === 6 && inspectionId && (
           <div className="bg-white rounded-2xl p-6 md:p-8 text-center">
             <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle className="h-8 w-8 text-green-600" />

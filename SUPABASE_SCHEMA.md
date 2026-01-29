@@ -52,7 +52,7 @@ CREATE TABLE rooms (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   inspection_id UUID REFERENCES inspections(id) ON DELETE CASCADE NOT NULL,
   room_name TEXT NOT NULL,
-  condition TEXT NOT NULL CHECK (condition IN ('Perfekt', 'Brugsspor', 'Skal udbedres')),
+  condition TEXT NOT NULL CHECK (condition IN ('Perfekt', 'Brugsspor', 'Mangel')),
   description TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );

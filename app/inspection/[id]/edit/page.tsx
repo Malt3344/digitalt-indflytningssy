@@ -5,13 +5,12 @@ import { useRouter, useParams } from 'next/navigation'
 import { CheckCircle, ArrowLeft } from 'lucide-react'
 import BasicInfo from '@/components/BasicInfo'
 import RoomInspection, { RoomData } from '@/components/RoomInspection'
-import PhotoUpload from '@/components/PhotoUpload'
 import MeterReadings from '@/components/MeterReadings'
 import Keys from '@/components/Keys'
 import Signature from '@/components/Signature'
 import { supabase } from '@/lib/supabase'
 
-type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7
+type Step = 1 | 2 | 3 | 4 | 5 | 6
 
 export default function EditInspection() {
   const router = useRouter()
@@ -30,7 +29,6 @@ export default function EditInspection() {
     inspectionDate: new Date().toISOString().split('T')[0],
   })
   const [rooms, setRooms] = useState<RoomData[]>([])
-  const [photos, setPhotos] = useState<{ [roomId: string]: string[] }>({})
   const [meterReadings, setMeterReadings] = useState({
     elMeterNo: '',
     elReading: '',
@@ -45,9 +43,6 @@ export default function EditInspection() {
     landlordSignature: '',
     tenantSignature: '',
   })
-  
-  // Track existing room IDs for update vs insert
-  const [existingRoomIds, setExistingRoomIds] = useState<string[]>([])
 
   // Load existing inspection data
   useEffect(() => {
@@ -63,7 +58,7 @@ export default function EditInspection() {
         return
       }
 
-      const { data: inspection, error } = await supabase
+      const { data: inspection, error } = await (supabase as any)
         .from('inspections')
         .select('*, rooms(*, photos(*))')
         .eq('id', inspectionId)
@@ -100,29 +95,13 @@ export default function EditInspection() {
       })
 
       // Transform rooms from DB format to component format
+      // Now photos are stored directly on each note
       if (inspection.rooms && inspection.rooms.length > 0) {
-        // Group rooms by room_name to handle multiple notes per room
         const roomsMap = new Map<string, RoomData>()
-        const photoMap: { [roomId: string]: string[] } = {}
-        const existingIds: string[] = []
 
         inspection.rooms.forEach((room: any) => {
-          existingIds.push(room.id)
-          
-          // Get photos for this room
-          if (room.photos && room.photos.length > 0) {
-            const roomPhotos = room.photos.map((p: any) => p.url)
-            
-            // Find the client-side room ID we'll use
-            const existingRoom = Array.from(roomsMap.values()).find(r => r.roomName === room.room_name)
-            if (existingRoom) {
-              photoMap[existingRoom.id] = [...(photoMap[existingRoom.id] || []), ...roomPhotos]
-            } else {
-              // Will be added when we create the room entry
-              const tempId = `room-${room.id}`
-              photoMap[tempId] = roomPhotos
-            }
-          }
+          // Get photos for this room/note
+          const notePhotos = room.photos ? room.photos.map((p: any) => p.url) : []
 
           // Check if we already have this room name
           const existingRoom = Array.from(roomsMap.values()).find(r => r.roomName === room.room_name)
@@ -133,6 +112,7 @@ export default function EditInspection() {
               id: `note-${room.id}`,
               condition: room.condition || 'Perfekt',
               description: room.description || '',
+              photos: notePhotos,
             })
           } else {
             // Create new room entry
@@ -144,19 +124,13 @@ export default function EditInspection() {
                 id: `note-${room.id}`,
                 condition: room.condition || 'Perfekt',
                 description: room.description || '',
+                photos: notePhotos,
               }],
             })
-            
-            // Update photoMap key
-            if (room.photos && room.photos.length > 0) {
-              photoMap[roomId] = room.photos.map((p: any) => p.url)
-            }
           }
         })
 
         setRooms(Array.from(roomsMap.values()))
-        setPhotos(photoMap)
-        setExistingRoomIds(existingIds)
       }
 
     } catch (err) {
@@ -177,19 +151,14 @@ export default function EditInspection() {
     setCurrentStep(3)
   }
 
-  const handlePhotosNext = (photoData: { [roomId: string]: string[] }) => {
-    setPhotos(photoData)
-    setCurrentStep(4)
-  }
-
   const handleMeterReadingsNext = (data: typeof meterReadings) => {
     setMeterReadings(data)
-    setCurrentStep(5)
+    setCurrentStep(4)
   }
 
   const handleKeysNext = (data: typeof keys) => {
     setKeys(data)
-    setCurrentStep(6)
+    setCurrentStep(5)
   }
 
   const handleSignaturesNext = async (signatureData: typeof signatures) => {
@@ -205,7 +174,7 @@ export default function EditInspection() {
       }
 
       // Update the inspection
-      const { error: updateError } = await supabase
+      const { error: updateError } = await (supabase as any)
         .from('inspections')
         .update({
           tenant_name: basicInfo.tenantName,
@@ -229,15 +198,15 @@ export default function EditInspection() {
       }
 
       // Delete all existing rooms (and their photos cascade)
-      await supabase
+      await (supabase as any)
         .from('rooms')
         .delete()
         .eq('inspection_id', inspectionId)
 
-      // Create new rooms with their notes
+      // Create new rooms with their notes and photos
       for (const room of rooms) {
         for (const note of room.notes) {
-          const { data: roomData, error: roomError } = await supabase
+          const { data: roomData, error: roomError } = await (supabase as any)
             .from('rooms')
             .insert({
               inspection_id: inspectionId,
@@ -250,18 +219,19 @@ export default function EditInspection() {
 
           if (roomError) throw roomError
 
-          // Create photos for this room
-          const roomPhotos = photos[room.id] || []
-          for (const photoUrl of roomPhotos) {
-            await supabase.from('photos').insert({
-              room_id: roomData.id,
-              url: photoUrl,
-            })
+          // Create photos for this note
+          if (note.photos && note.photos.length > 0) {
+            for (const photoUrl of note.photos) {
+              await (supabase as any).from('photos').insert({
+                room_id: roomData.id,
+                url: photoUrl,
+              })
+            }
           }
         }
       }
 
-      setCurrentStep(7)
+      setCurrentStep(6)
     } catch (error) {
       console.error('Error saving inspection:', error)
       alert('Der opstod en fejl ved gemning af inspektionen')
@@ -270,7 +240,7 @@ export default function EditInspection() {
     }
   }
 
-  const stepLabels = ['Grundinfo', 'Rum', 'Billeder', 'Målere', 'Nøgler', 'Underskrifter']
+  const stepLabels = ['Grundinfo', 'Rum & Billeder', 'Målere', 'Nøgler', 'Underskrifter']
 
   if (isLoading) {
     return (
@@ -311,10 +281,11 @@ export default function EditInspection() {
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
             Rediger syn
           </h1>
+          <p className="text-xs text-gray-400">jf. lejelovens § 9</p>
         </div>
 
         {/* Progress Bar */}
-        {currentStep < 7 && (
+        {currentStep < 6 && (
           <div className="mb-6">
             <div className="flex justify-between mb-2">
               {stepLabels.map((label, index) => (
@@ -335,7 +306,7 @@ export default function EditInspection() {
             <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
               <div
                 className="h-full bg-black transition-all duration-300"
-                style={{ width: `${(currentStep / 6) * 100}%` }}
+                style={{ width: `${(currentStep / 5) * 100}%` }}
               />
             </div>
           </div>
@@ -355,39 +326,30 @@ export default function EditInspection() {
         )}
 
         {currentStep === 3 && (
-          <PhotoUpload
-            rooms={rooms}
-            data={photos}
-            onNext={handlePhotosNext}
+          <MeterReadings
+            data={meterReadings}
+            onNext={handleMeterReadingsNext}
             onBack={() => setCurrentStep(2)}
           />
         )}
 
         {currentStep === 4 && (
-          <MeterReadings
-            data={meterReadings}
-            onNext={handleMeterReadingsNext}
+          <Keys
+            data={keys}
+            onNext={handleKeysNext}
             onBack={() => setCurrentStep(3)}
           />
         )}
 
         {currentStep === 5 && (
-          <Keys
-            data={keys}
-            onNext={handleKeysNext}
+          <Signature
+            data={signatures}
+            onNext={handleSignaturesNext}
             onBack={() => setCurrentStep(4)}
           />
         )}
 
         {currentStep === 6 && (
-          <Signature
-            data={signatures}
-            onNext={handleSignaturesNext}
-            onBack={() => setCurrentStep(5)}
-          />
-        )}
-
-        {currentStep === 7 && (
           <div className="bg-white rounded-2xl p-6 md:p-8 text-center">
             <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle className="h-8 w-8 text-green-600" />

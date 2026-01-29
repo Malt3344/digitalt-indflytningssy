@@ -1,5 +1,5 @@
 export type InspectionStatus = 'draft' | 'completed' | 'signed' | 'locked'
-export type RoomCondition = 'Perfekt' | 'Brugsspor' | 'Skal udbedres'
+export type RoomCondition = 'Perfekt' | 'Brugsspor' | 'Mangel'
 export type SubscriptionStatus = 'active' | 'canceled' | 'past_due' | 'trialing' | 'incomplete' | 'incomplete_expired' | 'unpaid'
 export type SubscriptionTier = 'basic' | 'professional' | 'enterprise'
 

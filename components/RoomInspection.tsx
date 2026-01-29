@@ -1,13 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Trash2, MessageSquare } from 'lucide-react'
+import { Plus, Trash2, MessageSquare, Upload, X, Camera } from 'lucide-react'
 import { RoomCondition } from '@/lib/types'
+import { supabase } from '@/lib/supabase'
 
 export interface RoomNote {
   id: string
   condition: RoomCondition
   description: string
+  photos: string[]
 }
 
 export interface RoomData {
@@ -41,10 +43,12 @@ export default function RoomInspection({ data, onNext, onBack }: RoomInspectionP
           {
             id: '1',
             roomName: '',
-            notes: [{ id: 'note-1', condition: 'Perfekt', description: '' }],
+            notes: [{ id: 'note-1', condition: 'Perfekt', description: '', photos: [] }],
           },
         ]
   )
+  
+  const [uploading, setUploading] = useState<Record<string, boolean>>({})
   
   // Track which rooms have "Andet" selected
   const [customRooms, setCustomRooms] = useState<Record<string, boolean>>(() => {
@@ -64,7 +68,7 @@ export default function RoomInspection({ data, onNext, onBack }: RoomInspectionP
       {
         id: Date.now().toString(),
         roomName: '',
-        notes: [{ id: `note-${Date.now()}`, condition: 'Perfekt', description: '' }],
+        notes: [{ id: `note-${Date.now()}`, condition: 'Perfekt', description: '', photos: [] }],
       },
     ])
   }
@@ -87,7 +91,7 @@ export default function RoomInspection({ data, onNext, onBack }: RoomInspectionP
               ...room,
               notes: [
                 ...room.notes,
-                { id: `note-${Date.now()}`, condition: 'Perfekt', description: '' },
+                { id: `note-${Date.now()}`, condition: 'Perfekt', description: '', photos: [] },
               ],
             }
           : room
@@ -122,6 +126,73 @@ export default function RoomInspection({ data, onNext, onBack }: RoomInspectionP
               ...room,
               notes: room.notes.map((note) =>
                 note.id === noteId ? { ...note, [field]: value } : note
+              ),
+            }
+          : room
+      )
+    )
+  }
+
+  // Photo handling for individual notes
+  const handlePhotoUpload = async (roomId: string, noteId: string, files: FileList | null) => {
+    if (!files || files.length === 0) return
+
+    const uploadKey = `${roomId}-${noteId}`
+    setUploading({ ...uploading, [uploadKey]: true })
+
+    const uploadedUrls: string[] = []
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i]
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${noteId}-${Date.now()}-${i}.${fileExt}`
+
+      try {
+        const { error: uploadError } = await supabase.storage
+          .from('inspection-photos')
+          .upload(fileName, file)
+
+        if (uploadError) throw uploadError
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('inspection-photos')
+          .getPublicUrl(fileName)
+
+        uploadedUrls.push(publicUrl)
+      } catch (error) {
+        console.error('Error uploading file:', error)
+      }
+    }
+
+    // Add uploaded photos to the note
+    setRooms(
+      rooms.map((room) =>
+        room.id === roomId
+          ? {
+              ...room,
+              notes: room.notes.map((note) =>
+                note.id === noteId
+                  ? { ...note, photos: [...note.photos, ...uploadedUrls] }
+                  : note
+              ),
+            }
+          : room
+      )
+    )
+
+    setUploading({ ...uploading, [uploadKey]: false })
+  }
+
+  const removePhoto = (roomId: string, noteId: string, photoUrl: string) => {
+    setRooms(
+      rooms.map((room) =>
+        room.id === roomId
+          ? {
+              ...room,
+              notes: room.notes.map((note) =>
+                note.id === noteId
+                  ? { ...note, photos: note.photos.filter((url) => url !== photoUrl) }
+                  : note
               ),
             }
           : room
@@ -245,7 +316,7 @@ export default function RoomInspection({ data, onNext, onBack }: RoomInspectionP
                         Stand
                       </label>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                        {(['Perfekt', 'Brugsspor', 'Skal udbedres'] as RoomCondition[]).map(
+                        {(['Perfekt', 'Brugsspor', 'Mangel'] as RoomCondition[]).map(
                           (condition) => (
                             <button
                               key={condition}
@@ -279,6 +350,51 @@ export default function RoomInspection({ data, onNext, onBack }: RoomInspectionP
                         className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900 transition-colors resize-none"
                         placeholder="Beskriv eventuelle skader eller bemærkninger..."
                       />
+                    </div>
+
+                    {/* Photo upload for this note */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Billeder (valgfrit)
+                      </label>
+                      
+                      {/* Upload button */}
+                      <label className="flex items-center justify-center gap-2 w-full px-4 py-3 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-gray-400 transition-colors mb-3">
+                        <Camera className="h-5 w-5 text-gray-400" />
+                        <span className="text-sm text-gray-500">
+                          {uploading[`${room.id}-${note.id}`] ? 'Uploader...' : 'Tilføj billeder'}
+                        </span>
+                        <input
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => handlePhotoUpload(room.id, note.id, e.target.files)}
+                          disabled={uploading[`${room.id}-${note.id}`]}
+                        />
+                      </label>
+
+                      {/* Photo grid */}
+                      {note.photos && note.photos.length > 0 && (
+                        <div className="grid grid-cols-3 gap-2">
+                          {note.photos.map((url, photoIndex) => (
+                            <div key={photoIndex} className="relative group">
+                              <img
+                                src={url}
+                                alt={`Billede ${photoIndex + 1}`}
+                                className="w-full h-20 object-cover rounded-lg"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removePhoto(room.id, note.id, url)}
+                                className="absolute top-1 right-1 bg-black/70 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
