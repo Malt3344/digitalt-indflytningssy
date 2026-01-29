@@ -61,6 +61,14 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4">
       <div className="max-w-md w-full px-4">
+        {/* Back to home link */}
+        <a 
+          href="/"
+          className="inline-flex items-center gap-1 text-gray-500 text-sm mb-8 hover:text-gray-900 transition-colors"
+        >
+          ← Tilbage til forsiden
+        </a>
+
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Log ind</h1>
           <p className="text-gray-600 text-sm">Lav indflytningssyn nemt og ordentligt</p>

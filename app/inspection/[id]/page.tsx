@@ -208,7 +208,7 @@ export default function InspectionDetailPage() {
                 {inspection.landlord_signature ? (
                   <span className="text-green-600 text-sm">✓ Underskrevet</span>
                 ) : (
-                  <span className="text-gray-400 text-sm">Mangler</span>
+                  <span className="text-orange-500 text-sm">Mangler</span>
                 )}
               </div>
               <div className="flex-1">
@@ -216,12 +216,45 @@ export default function InspectionDetailPage() {
                 {inspection.tenant_signature ? (
                   <span className="text-green-600 text-sm">✓ Underskrevet</span>
                 ) : (
-                  <span className="text-gray-400 text-sm">Mangler</span>
+                  <span className="text-orange-500 text-sm">Mangler</span>
                 )}
               </div>
             </div>
           </div>
+
+          {/* Rooms */}
+          {inspection.rooms && inspection.rooms.length > 0 && (
+            <div className="bg-gray-50 rounded-xl p-4">
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                Rum ({inspection.rooms.length})
+              </h3>
+              <div className="space-y-2">
+                {inspection.rooms.map((room: any, index: number) => (
+                  <div key={room.id || index} className="flex items-center justify-between text-sm">
+                    <span className="text-gray-900">{room.room_name}</span>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                      room.condition === 'Perfekt' ? 'bg-green-100 text-green-700' :
+                      room.condition === 'Brugsspor' ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-red-100 text-red-700'
+                    }`}>
+                      {room.condition}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* Edit button - show if missing signatures */}
+        {(!inspection.landlord_signature || !inspection.tenant_signature) && (
+          <button
+            onClick={() => router.push(`/inspection/${inspection.id}/edit`)}
+            className="w-full border-2 border-gray-200 text-gray-700 py-4 rounded-xl font-semibold hover:bg-gray-50 transition-colors mb-4"
+          >
+            Rediger syn
+          </button>
+        )}
 
         {/* Download button */}
         <DownloadPDFButton
