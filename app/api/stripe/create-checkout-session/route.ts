@@ -62,8 +62,8 @@ export async function POST(req: NextRequest) {
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/abonnement/succes?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/priser`,
+      success_url: `${process.env.NEXT_PUBLIC_URL}/abonnement/succes?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_URL}/priser`,
       metadata: {
         supabase_user_id: user.id,
         subscription_tier: tier,

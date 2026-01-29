@@ -129,8 +129,8 @@ export async function POST(req: NextRequest) {
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/inspection/${inspectionId}/download?payment=success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/inspection/${inspectionId}?payment=cancelled`,
+      success_url: `${process.env.NEXT_PUBLIC_URL}/inspection/${inspectionId}/download?payment=success`,
+      cancel_url: `${process.env.NEXT_PUBLIC_URL}/inspection/${inspectionId}?payment=cancelled`,
       metadata: {
         supabase_user_id: actualUserId,
         inspection_id: inspectionId,

@@ -1,5 +1,7 @@
 # Supabase Database Schema
 
+⚠️ **IMPORTANT**: Use the complete database fix script `DATABASE_FIX_COMPLETE.sql` instead of running individual commands below.
+
 Run these SQL commands in your Supabase SQL Editor:
 
 ```sql
@@ -24,7 +26,25 @@ CREATE TABLE inspections (
   heat_reading NUMERIC(10, 2),
   -- Keys
   key_count INTEGER,
-  key_notes TEXT
+  key_notes TEXT,
+  -- Payment fields
+  is_paid BOOLEAN DEFAULT false,
+  payment_intent_id TEXT
+);
+
+-- Create user_profiles table with subscription information
+CREATE TABLE user_profiles (
+  id UUID REFERENCES auth.users PRIMARY KEY,
+  email TEXT NOT NULL,
+  stripe_customer_id TEXT UNIQUE,
+  stripe_subscription_id TEXT UNIQUE,
+  subscription_status TEXT,
+  subscription_tier TEXT CHECK (subscription_tier IN ('basic', 'professional', 'enterprise')),
+  subscription_current_period_end TIMESTAMP WITH TIME ZONE,
+  inspections_count INTEGER DEFAULT 0,
+  onboarding_completed BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
 -- Create rooms table
@@ -53,6 +73,7 @@ VALUES ('inspection-photos', 'inspection-photos', true);
 ALTER TABLE inspections ENABLE ROW LEVEL SECURITY;
 ALTER TABLE rooms ENABLE ROW LEVEL SECURITY;
 ALTER TABLE photos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
 
 -- Policies for inspections
 CREATE POLICY "Users can view their own inspections"
@@ -66,6 +87,19 @@ CREATE POLICY "Users can create their own inspections"
 CREATE POLICY "Users can update their own inspections"
   ON inspections FOR UPDATE
   USING (auth.uid() = landlord_id);
+
+-- Policies for user_profiles
+CREATE POLICY "Users can view their own profile"
+  ON user_profiles FOR SELECT
+  USING (auth.uid() = id);
+
+CREATE POLICY "Users can update their own profile"
+  ON user_profiles FOR UPDATE
+  USING (auth.uid() = id);
+
+CREATE POLICY "Users can insert their own profile"
+  ON user_profiles FOR INSERT
+  WITH CHECK (auth.uid() = id);
 
 -- Policies for rooms
 CREATE POLICY "Users can view rooms of their inspections"
