@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { LogIn, Mail, Lock } from 'lucide-react'
@@ -10,7 +10,21 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [checkingAuth, setCheckingAuth] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Redirect if already logged in
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        router.replace('/')
+      } else {
+        setCheckingAuth(false)
+      }
+    }
+    checkAuth()
+  }, [router])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -33,6 +47,15 @@ export default function LoginPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Show loading while checking auth
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-10 w-10 border-2 border-gray-300 border-t-black"></div>
+      </div>
+    )
   }
 
   return (

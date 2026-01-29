@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { UserPlus, Mail, Lock, User } from 'lucide-react'
@@ -11,8 +11,22 @@ export default function SignupPage() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [checkingAuth, setCheckingAuth] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+
+  // Redirect if already logged in
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        router.replace('/')
+      } else {
+        setCheckingAuth(false)
+      }
+    }
+    checkAuth()
+  }, [router])
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -48,6 +62,15 @@ export default function SignupPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Show loading while checking auth
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-10 w-10 border-2 border-gray-300 border-t-black"></div>
+      </div>
+    )
   }
 
   if (success) {
