@@ -58,7 +58,9 @@ export default function SignupPage() {
         router.push('/auth/login')
       }, 3000)
     } catch (error: any) {
-      setError(error.message)
+      // Handle Supabase error objects properly
+      const errorMessage = error?.message || (typeof error === 'object' ? JSON.stringify(error) : String(error))
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }

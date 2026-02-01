@@ -1,15 +1,15 @@
-import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+import { createBrowserClient } from '@supabase/ssr'
 import type { Database } from './types'
 
-// Browser client - uses localStorage for session persistence
-export const supabase = createSupabaseClient<Database>(
+// Browser client - uses cookies for session persistence (syncs with server)
+export const supabase = createBrowserClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
 // Alias for consistency
 export function createClient() {
-  return createSupabaseClient<Database>(
+  return createBrowserClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
