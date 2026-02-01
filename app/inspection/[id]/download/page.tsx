@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { generatePDF } from '@/lib/pdf-generator'
+import { isAdminEmail } from '@/lib/admin-config'
 
 export default function DownloadPage() {
   const params = useParams()
@@ -40,7 +41,10 @@ export default function DownloadPage() {
         return
       }
 
-      if (!inspection.is_paid) {
+      // Check if admin (unlimited free access) or paid
+      const userIsAdmin = isAdminEmail(user.email)
+      
+      if (!inspection.is_paid && !userIsAdmin) {
         // Redirect back to inspection page to pay
         router.push(`/inspection/${inspectionId}?payment=required`)
         return
@@ -85,9 +89,11 @@ export default function DownloadPage() {
         {status === 'success' && (
           <>
             <div className="w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-xl">✓</span>
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
             </div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Download startet!</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Download startet</h2>
             <p className="text-gray-600">Din synsrapport downloades nu...</p>
           </>
         )}

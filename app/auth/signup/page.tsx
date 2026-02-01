@@ -78,9 +78,11 @@ export default function SignupPage() {
       <div className="min-h-screen bg-white flex items-center justify-center px-4">
         <div className="max-w-md w-full text-center px-4">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-3xl">✓</span>
+            <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Konto oprettet!</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Konto oprettet</h2>
           <p className="text-gray-600 mb-4">
             Tjek din email for at bekræfte din konto.
           </p>

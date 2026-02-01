@@ -5,6 +5,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { Trash2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { generatePDF } from '@/lib/pdf-generator'
+import { isAdminEmail } from '@/lib/admin-config'
 import DownloadPDFButton from '@/components/DownloadPDFButton'
 import Navigation from '@/components/Navigation'
 
@@ -34,6 +35,7 @@ export default function InspectionDetailPage() {
   const [inspection, setInspection] = useState<Inspection | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   const inspectionId = params.id as string
   const paymentStatus = searchParams.get('payment')
@@ -58,6 +60,9 @@ export default function InspectionDetailPage() {
         router.push('/auth/login')
         return
       }
+
+      // Check if user is admin
+      setIsAdmin(isAdminEmail(user.email))
 
       const { data, error: fetchError } = await supabase
         .from('inspections')
@@ -100,23 +105,38 @@ export default function InspectionDetailPage() {
 
     try {
       // Delete rooms (and their photos cascade) first
-      await supabase
+      const { error: roomsError } = await supabase
         .from('rooms')
         .delete()
         .eq('inspection_id', inspection.id)
 
-      // Delete the inspection
+      if (roomsError) {
+        console.error('Error deleting rooms:', roomsError)
+      }
+
+      // Delete the inspection - must match user_id for RLS
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        throw new Error('Bruger ikke logget ind')
+      }
+      
       const { error } = await supabase
         .from('inspections')
         .delete()
         .eq('id', inspection.id)
+        .eq('landlord_id', user.id)
 
-      if (error) throw error
-
-      router.push('/')
+      if (error) {
+        console.error('Delete error:', error)
+        throw error
+      }
+      
+      // Force a hard navigation to ensure fresh data
+      window.location.href = '/'
     } catch (error) {
       console.error('Error deleting inspection:', error)
-      alert('Der opstod en fejl ved sletning')
+      alert('Der opstod en fejl ved sletning: ' + (error as any)?.message)
     }
   }
 
@@ -152,19 +172,27 @@ export default function InspectionDetailPage() {
       <main className="max-w-2xl mx-auto px-4 py-6 pb-24">
         {/* Payment success message */}
         {paymentStatus === 'success' && (
-          <div className="bg-green-50 border border-green-200 text-green-700 rounded-xl p-4 mb-6 text-center">
-            ✓ Betaling gennemført! Du kan nu downloade din synsrapport.
+          <div className="bg-green-50 border border-green-200 text-green-700 rounded-xl p-4 mb-6 text-center font-medium">
+            Betaling gennemført - du kan nu downloade din synsrapport
           </div>
         )}
 
-        {/* Header */}
+        {/* Header with breadcrumb */}
         <div className="mb-6">
-          <button
-            onClick={() => router.push('/')}
-            className="text-gray-500 text-sm mb-4 flex items-center gap-1"
-          >
-            ← Tilbage
-          </button>
+          <nav className="flex items-center gap-2 text-sm text-gray-500 mb-4">
+            <button
+              onClick={() => router.push('/')}
+              className="hover:text-black transition-colors"
+            >
+              Mine syn
+            </button>
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+            <span className="text-gray-900 font-medium truncate max-w-[200px]">
+              {inspection.address || 'Detaljer'}
+            </span>
+          </nav>
           
           <h1 className="text-2xl font-bold text-gray-900 mb-1">
             {inspection.address || 'Ingen adresse'}
@@ -196,7 +224,7 @@ export default function InspectionDetailPage() {
               <div className="flex-1">
                 <p className="text-sm text-gray-500 mb-1">Udlejer</p>
                 {inspection.landlord_signature ? (
-                  <span className="text-green-600 text-sm">✓ Underskrevet</span>
+                  <span className="text-green-600 text-sm font-medium">Underskrevet</span>
                 ) : (
                   <span className="text-orange-500 text-sm">Mangler</span>
                 )}
@@ -204,7 +232,7 @@ export default function InspectionDetailPage() {
               <div className="flex-1">
                 <p className="text-sm text-gray-500 mb-1">Lejer</p>
                 {inspection.tenant_signature ? (
-                  <span className="text-green-600 text-sm">✓ Underskrevet</span>
+                  <span className="text-green-600 text-sm font-medium">Underskrevet</span>
                 ) : (
                   <span className="text-orange-500 text-sm">Mangler</span>
                 )}
@@ -241,7 +269,7 @@ export default function InspectionDetailPage() {
         {/* Download button */}
         <DownloadPDFButton
           inspectionId={inspection.id}
-          isPaid={inspection.is_paid}
+          isPaid={inspection.is_paid || isAdmin}
           onDownload={handleDownload}
         />
       </main>

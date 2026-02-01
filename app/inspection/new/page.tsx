@@ -11,6 +11,7 @@ import Signature from '@/components/Signature'
 import DownloadPDFButton from '@/components/DownloadPDFButton'
 import { supabase } from '@/lib/supabase'
 import { generatePDF } from '@/lib/pdf-generator'
+import { isAdminEmail } from '@/lib/admin-config'
 
 type Step = 1 | 2 | 3 | 4 | 5 | 6
 
@@ -21,6 +22,7 @@ export default function NewInspection() {
   const [inspectionId, setInspectionId] = useState<string | null>(null)
   const [isPaid, setIsPaid] = useState(false)
   const [isFirstInspection, setIsFirstInspection] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   // Form data
   const [basicInfo, setBasicInfo] = useState({
@@ -53,13 +55,17 @@ export default function NewInspection() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
+    // Check if user is admin (unlimited free access)
+    const userIsAdmin = isAdminEmail(user.email)
+    setIsAdmin(userIsAdmin)
+
     const { count } = await supabase
       .from('inspections')
       .select('*', { count: 'exact', head: true })
       .eq('landlord_id', user.id)
 
-    // First inspection is free (is_paid = true)
-    setIsFirstInspection(count === 0)
+    // First inspection is free OR admin gets free access
+    setIsFirstInspection(count === 0 || userIsAdmin)
   }
 
   const handleBasicInfoNext = (data: typeof basicInfo) => {
@@ -114,7 +120,7 @@ export default function NewInspection() {
         heat_reading: meterReadings.heatReading ? parseFloat(meterReadings.heatReading) : null,
         key_count: keys.keyCount ? parseInt(keys.keyCount) : null,
         key_notes: keys.keyNotes || null,
-        is_paid: isFirstInspection, // First inspection is free (is_paid = true)
+        is_paid: isFirstInspection || isAdmin, // First inspection OR admin gets free (is_paid = true)
       }
       
       console.log('Insert payload:', insertPayload)
@@ -195,51 +201,103 @@ export default function NewInspection() {
 
   const stepLabels = ['Grundinfo', 'Rum & Billeder', 'Målere', 'Nøgler', 'Underskrifter']
 
+  // Handle going back - either to previous step or show confirmation to leave
+  const handleGoBack = () => {
+    if (currentStep === 1) {
+      // First step - confirm before leaving
+      if (basicInfo.tenantName || basicInfo.address) {
+        const confirmed = window.confirm('Er du sikker på, at du vil forlade? Dine indtastninger vil gå tabt.')
+        if (confirmed) {
+          router.push('/')
+        }
+      } else {
+        router.push('/')
+      }
+    } else {
+      // Go to previous step
+      setCurrentStep((currentStep - 1) as Step)
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-white py-6 px-4 pb-24">
-      <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Nyt indflytningssyn
-          </h1>
-          <p className="text-xs text-gray-400 mb-2">jf. lejelovens § 9</p>
-          {isFirstInspection && currentStep < 6 && (
-            <span className="inline-block bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-medium">
-              🎉 Dette syn er gratis
+    <div className="min-h-screen bg-white">
+      {/* Top Navigation Bar */}
+      <header className="sticky top-0 bg-white border-b border-gray-100 z-40">
+        <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
+          <button
+            onClick={handleGoBack}
+            className="flex items-center gap-1 text-gray-600 hover:text-black transition-colors -ml-2 px-2 py-1 rounded-lg"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            <span className="text-sm font-medium">
+              {currentStep === 1 ? 'Annuller' : 'Tilbage'}
             </span>
-          )}
+          </button>
+          
+          <span className="font-semibold text-gray-900">
+            {currentStep < 6 ? `Trin ${currentStep} af 5` : 'Fuldført'}
+          </span>
+          
+          <div className="w-20" /> {/* Spacer for balance */}
         </div>
+      </header>
 
-        {/* Progress Bar */}
-        {currentStep < 6 && (
-          <div className="mb-6">
-            <div className="flex justify-between mb-2">
-              {stepLabels.map((label, index) => (
-                <div
-                  key={label}
-                  className={`text-xs font-medium ${
-                    currentStep > index + 1
-                      ? 'text-green-600'
-                      : currentStep === index + 1
-                      ? 'text-black'
-                      : 'text-gray-400'
-                  }`}
-                >
-                  {label}
-                </div>
-              ))}
-            </div>
-            <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-black transition-all duration-300"
-                style={{ width: `${(currentStep / 5) * 100}%` }}
-              />
-            </div>
+      <div className="py-6 px-4 pb-24">
+        <div className="max-w-2xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-6">
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">
+              Nyt indflytningssyn
+            </h1>
+            <p className="text-xs text-gray-400 mb-2">jf. lejelovens § 9</p>
+            {isFirstInspection && currentStep < 6 && (
+              <span className="inline-block bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-medium">
+                Dette syn er gratis
+              </span>
+            )}
           </div>
-        )}
 
-        {/* Steps */}
+          {/* Progress Bar - Clickable Navigation */}
+          {currentStep < 6 && (
+            <div className="mb-6">
+              <div className="flex justify-between mb-2">
+                {stepLabels.map((label, index) => {
+                  const stepNumber = index + 1 as Step
+                  const isCompleted = currentStep > stepNumber
+                  const isCurrent = currentStep === stepNumber
+                  const isClickable = stepNumber < currentStep // Can go back to completed steps
+                  
+                  return (
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={() => isClickable && setCurrentStep(stepNumber)}
+                      disabled={!isClickable}
+                      className={`text-xs font-medium transition-colors ${
+                        isCompleted
+                          ? 'text-green-600 hover:text-green-700 cursor-pointer'
+                          : isCurrent
+                          ? 'text-black cursor-default'
+                          : 'text-gray-400 cursor-default'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  )
+                })}
+              </div>
+              <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-black transition-all duration-300"
+                  style={{ width: `${(currentStep / 5) * 100}%` }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Steps */}
         {currentStep === 1 && (
           <BasicInfo data={basicInfo} onNext={handleBasicInfoNext} />
         )}
@@ -316,6 +374,7 @@ export default function NewInspection() {
             </div>
           </div>
         )}
+        </div>
       </div>
     </div>
   )

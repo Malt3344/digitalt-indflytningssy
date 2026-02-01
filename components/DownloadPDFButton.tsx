@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Download, Lock, Loader2, CheckCircle2 } from 'lucide-react'
+import { Download, Loader2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 interface DownloadPDFButtonProps {
@@ -29,15 +29,15 @@ export default function DownloadPDFButton({
         return
       }
       
+      // Server will authenticate via cookies - no need to send userId
       const response = await fetch('/api/stripe/create-pdf-payment-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.id}`, // Send user ID as additional verification
         },
+        credentials: 'include', // Important: include cookies for server auth
         body: JSON.stringify({
           inspectionId: inspectionId,
-          userId: user.id, // Include user ID in payload
         }),
       })
 
@@ -73,9 +73,19 @@ export default function DownloadPDFButton({
       <button
         onClick={handleDirectDownload}
         disabled={loading}
-        className="w-full bg-green-600 text-white py-4 rounded-xl font-semibold active:bg-green-700 disabled:opacity-50"
+        className="w-full bg-green-600 text-white py-4 rounded-xl font-semibold flex items-center justify-center gap-2 active:bg-green-700 disabled:opacity-50"
       >
-        {loading ? 'Genererer...' : '✓ Download synsrapport'}
+        {loading ? (
+          <>
+            <Loader2 className="h-5 w-5 animate-spin" />
+            Genererer...
+          </>
+        ) : (
+          <>
+            <Download className="h-5 w-5" />
+            Download synsrapport
+          </>
+        )}
       </button>
     )
   }
@@ -91,9 +101,16 @@ export default function DownloadPDFButton({
       <button
         onClick={handlePayment}
         disabled={loading}
-        className="w-full bg-black text-white py-4 rounded-xl font-semibold active:bg-gray-800 disabled:opacity-50"
+        className="w-full bg-black text-white py-4 rounded-xl font-semibold flex items-center justify-center gap-2 active:bg-gray-800 disabled:opacity-50"
       >
-        {loading ? 'Indlæser...' : 'Betal 149 kr og download'}
+        {loading ? (
+          <>
+            <Loader2 className="h-5 w-5 animate-spin" />
+            Indlæser...
+          </>
+        ) : (
+          'Betal 149 kr og download'
+        )}
       </button>
     </div>
   )

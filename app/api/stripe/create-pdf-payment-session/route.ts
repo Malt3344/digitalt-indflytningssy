@@ -1,34 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminSupabase } from '@/lib/supabase-server'
+import { createAdminSupabase, createServerSupabase } from '@/lib/supabase-server'
 import { stripe } from '@/lib/stripe'
 
 export async function POST(req: NextRequest) {
   try {
-    console.log('=== CREATE PDF PAYMENT SESSION START ===')
+    // Get authenticated user from server session - NOT from request body!
+    const serverSupabase = await createServerSupabase()
+    const { data: { user }, error: authError } = await serverSupabase.auth.getUser()
     
-    // Use admin client to bypass RLS
-    const supabase = createAdminSupabase()
-
-    const { inspectionId, userId } = await req.json()
-    console.log('Request payload:', { inspectionId, userId })
-
-    if (!inspectionId) {
-      console.log('Missing inspection ID')
-      return NextResponse.json(
-        { error: 'Inspection ID er påkrævet' },
-        { status: 400 }
-      )
-    }
-
-    if (!userId) {
-      console.log('Missing user ID')
+    if (authError || !user) {
       return NextResponse.json(
         { error: 'Ikke autentificeret' },
         { status: 401 }
       )
     }
     
-    const actualUserId = userId
+    // Use admin client for database operations
+    const supabase = createAdminSupabase()
+
+    const { inspectionId } = await req.json()
+
+    if (!inspectionId) {
+      return NextResponse.json(
+        { error: 'Inspection ID er påkrævet' },
+        { status: 400 }
+      )
+    }
+    
+    // Use authenticated user ID - never trust client-sent userId
+    const actualUserId = user.id
 
     // Verify the inspection belongs to the user and is not already paid
     interface InspectionResult {
@@ -39,18 +39,13 @@ export async function POST(req: NextRequest) {
       address: string
     }
     
-    console.log('Querying inspection with:', { inspectionId, actualUserId })
-    
     const { data: inspection, error: inspectionError } = await supabase
       .from('inspections')
       .select('id, landlord_id, is_paid, tenant_name, address')
       .eq('id', inspectionId)
       .single() as { data: InspectionResult | null; error: any }
 
-    console.log('Inspection query result:', { inspection, inspectionError })
-
     if (inspectionError || !inspection) {
-      console.log('Inspection not found:', inspectionError)
       return NextResponse.json(
         { error: 'Indflytningssyn ikke fundet' },
         { status: 404 }
@@ -59,18 +54,6 @@ export async function POST(req: NextRequest) {
 
     // Verify the inspection belongs to the user
     if (inspection.landlord_id !== actualUserId) {
-      console.log('Unauthorized: wrong landlord_id', { 
-        inspectionLandlord: inspection.landlord_id, 
-        requestUser: actualUserId 
-      })
-      return NextResponse.json(
-        { error: 'Ikke autoriseret' },
-        { status: 403 }
-      )
-    }
-
-    if (inspection.landlord_id !== actualUserId) {
-      console.log('Unauthorized: wrong landlord_id')
       return NextResponse.json(
         { error: 'Ikke autoriseret' },
         { status: 403 }
@@ -78,7 +61,6 @@ export async function POST(req: NextRequest) {
     }
 
     if (inspection.is_paid) {
-      console.log('Already paid')
       return NextResponse.json(
         { error: 'Dette syn er allerede betalt' },
         { status: 400 }
@@ -95,9 +77,8 @@ export async function POST(req: NextRequest) {
     let customerId = profile?.stripe_customer_id
 
     if (!customerId) {
-      // Get user email from auth
-      const { data: { user } } = await supabase.auth.admin.getUserById(actualUserId)
-      const userEmail = user?.email || profile?.email || 'user@example.com'
+      // Get user email from authenticated user
+      const userEmail = user.email || profile?.email || 'user@example.com'
       
       const customer = await stripe.customers.create({
         email: userEmail,
@@ -115,10 +96,6 @@ export async function POST(req: NextRequest) {
     }
 
     // Create checkout session for one-time payment
-    console.log('Creating Stripe session...')
-    console.log('Price ID:', process.env.NEXT_PUBLIC_STRIPE_PRICE_PDF_DOWNLOAD)
-    console.log('Customer ID:', customerId)
-    
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       mode: 'payment',
@@ -143,7 +120,6 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    console.log('Stripe session created:', session.id, session.url)
     return NextResponse.json({ sessionId: session.id, url: session.url })
   } catch (error) {
     console.error('Error creating PDF payment session:', error)

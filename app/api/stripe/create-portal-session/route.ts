@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase'
+import { createServerSupabase } from '@/lib/supabase-server'
 import { stripe } from '@/lib/stripe'
 
 export async function POST(req: NextRequest) {
   try {
-    const supabase = createClient()
+    // Use server client to properly authenticate via cookies
+    const supabase = await createServerSupabase()
     
-    // Get the authenticated user
+    // Get the authenticated user from server session
     const { data: { user }, error: userError } = await supabase.auth.getUser()
     
     if (userError || !user) {

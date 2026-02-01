@@ -57,7 +57,7 @@ export default function Home() {
             </h1>
             {firstFree ? (
               <span className="inline-block bg-green-50 text-green-700 px-3 py-1.5 rounded-full text-sm font-medium">
-                🎉 Første syn er gratis
+                Første syn er gratis
               </span>
             ) : (
               <p className="text-gray-600 text-sm">149 kr per synsrapport</p>
@@ -98,8 +98,10 @@ export default function Home() {
                       </p>
                     </div>
                     {inspection.is_paid && (
-                      <span className="ml-3 flex-shrink-0 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                        ✓
+                      <span className="ml-3 flex-shrink-0 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center">
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
                       </span>
                     )}
                   </div>

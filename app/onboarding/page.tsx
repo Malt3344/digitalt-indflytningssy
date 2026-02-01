@@ -164,9 +164,9 @@ const steps = [
           </div>
         </div>
         <div className="space-y-2 text-sm text-gray-600">
-          <p>📝 Brug fingeren eller en stylus til at underskrive</p>
-          <p>🔒 Dokumentet låses automatisk efter begge signaturer</p>
-          <p>💾 Data gemmes sikkert i skyen</p>
+          <p>• Brug fingeren eller en stylus til at underskrive</p>
+          <p>• Dokumentet låses automatisk efter begge signaturer</p>
+          <p>• Data gemmes sikkert i skyen</p>
         </div>
       </div>
     ),
