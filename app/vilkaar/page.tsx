@@ -1,8 +1,8 @@
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Handelsbetingelser | SynsApp',
-  description: 'Læs vores handelsbetingelser og vilkår for brug af SynsApp',
+  title: 'Handelsbetingelser | Synsguiden',
+  description: 'Læs vores handelsbetingelser og vilkår for brug af Synsguiden',
 }
 
 export default function VilkaarPage() {
@@ -23,7 +23,7 @@ export default function VilkaarPage() {
           <section className="mb-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">1. Generelt</h2>
             <p className="text-gray-600 mb-4">
-              Disse handelsbetingelser gælder for alle køb og brug af SynsApp's tjenester. 
+              Disse handelsbetingelser gælder for alle køb og brug af Synsguiden's tjenester. 
               Ved at oprette en konto eller købe en synsrapport accepterer du disse betingelser.
             </p>
           </section>
@@ -31,7 +31,7 @@ export default function VilkaarPage() {
           <section className="mb-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">2. Tjenesten</h2>
             <p className="text-gray-600 mb-4">
-              SynsApp er en digital platform til oprettelse af indflytningssyn. Tjenesten inkluderer:
+              Synsguiden er en digital platform til oprettelse af indflytningssyn. Tjenesten inkluderer:
             </p>
             <ul className="list-disc pl-6 text-gray-600 space-y-2">
               <li>Oprettelse af digitale indflytningssyn</li>
@@ -72,7 +72,7 @@ export default function VilkaarPage() {
           <section className="mb-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">5. Ansvarsbegrænsning</h2>
             <p className="text-gray-600 mb-4">
-              SynsApp leverer et værktøj til dokumentation af indflytningssyn. Vi garanterer ikke:
+              Synsguiden leverer et værktøj til dokumentation af indflytningssyn. Vi garanterer ikke:
             </p>
             <ul className="list-disc pl-6 text-gray-600 space-y-2">
               <li>At synsrapporten vil være juridisk bindende i alle tvister</li>
@@ -87,7 +87,7 @@ export default function VilkaarPage() {
           <section className="mb-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">6. Brugerens ansvar</h2>
             <p className="text-gray-600 mb-4">
-              Som bruger af SynsApp er du ansvarlig for:
+              Som bruger af Synsguiden er du ansvarlig for:
             </p>
             <ul className="list-disc pl-6 text-gray-600 space-y-2">
               <li>At de oplysninger du indtaster er korrekte</li>
@@ -100,7 +100,7 @@ export default function VilkaarPage() {
           <section className="mb-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">7. Ophavsret</h2>
             <p className="text-gray-600 mb-4">
-              Alt indhold på SynsApp, herunder design, kode og tekst, er beskyttet af ophavsret. 
+              Alt indhold på Synsguiden, herunder design, kode og tekst, er beskyttet af ophavsret. 
               Du må downloade og bruge dine egne synsrapporter til lovlige formål.
             </p>
           </section>
@@ -136,7 +136,7 @@ export default function VilkaarPage() {
             <h2 className="text-xl font-semibold text-gray-900 mb-4">11. Kontakt</h2>
             <p className="text-gray-600">
               Hvis du har spørgsmål til disse betingelser, kan du kontakte os på:{' '}
-              <a href="mailto:support@synsapp.dk" className="text-black underline">support@synsapp.dk</a>
+              <a href="mailto:support@synsguiden.com" className="text-black underline">support@synsguiden.com</a>
             </p>
           </section>
         </div>

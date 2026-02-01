@@ -14,16 +14,16 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: "SynsApp - Digitalt Indflytningssyn",
+  title: "Synsguiden - Digitalt Indflytningssyn",
   description: "Lav professionelle indflytningssyn på 5 minutter. Tag fotos, få digital underskrift og download PDF-rapport. Første syn er gratis!",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "SynsApp",
+    title: "Synsguiden",
   },
   openGraph: {
-    title: "SynsApp - Digitalt Indflytningssyn",
+    title: "Synsguiden - Digitalt Indflytningssyn",
     description: "Lav professionelle indflytningssyn på 5 minutter. Første syn er gratis!",
     type: "website",
     locale: "da_DK",

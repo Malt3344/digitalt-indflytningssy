@@ -509,7 +509,7 @@ export async function generatePDF(inspection: InspectionData) {
     doc.setFontSize(7)
     doc.setFont('helvetica', 'normal')
     doc.setTextColor(150, 150, 150)
-    doc.text('Digitalt Indflytningssyn', margin, 290)
+    doc.text('Synsguiden.com - Digitalt Indflytningssyn', margin, 290)
     doc.text(`${inspection.address} • ${formattedDate}`, pageWidth / 2, 290, { align: 'center' })
     doc.text(`Side ${i} af ${pageCount}`, pageWidth - margin, 290, { align: 'right' })
   }

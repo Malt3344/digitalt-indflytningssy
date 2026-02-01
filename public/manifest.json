@@ -1,6 +1,6 @@
 {
-  "name": "SynsApp - Digitalt Indflytningssyn",
-  "short_name": "SynsApp",
+  "name": "Synsguiden - Digitalt Indflytningssyn",
+  "short_name": "Synsguiden",
   "description": "Lav professionelle indflytningssyn på 5 minutter. Tag fotos, få digital underskrift og download PDF-rapport.",
   "start_url": "/",
   "display": "standalone",

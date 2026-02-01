@@ -1,8 +1,8 @@
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Privatlivspolitik | SynsApp',
-  description: 'Læs om hvordan SynsApp behandler dine persondata',
+  title: 'Privatlivspolitik | Synsguiden',
+  description: 'Læs om hvordan Synsguiden behandler dine persondata',
 }
 
 export default function PrivatlivspolitikPage() {
@@ -23,8 +23,8 @@ export default function PrivatlivspolitikPage() {
           <section className="mb-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">1. Dataansvarlig</h2>
             <p className="text-gray-600 mb-4">
-              SynsApp er dataansvarlig for behandlingen af de personoplysninger, som vi modtager om dig. 
-              Du kan kontakte os på: <a href="mailto:support@synsapp.dk" className="text-black underline">support@synsapp.dk</a>
+              Synsguiden er dataansvarlig for behandlingen af de personoplysninger, som vi modtager om dig. 
+              Du kan kontakte os på: <a href="mailto:support@synsguiden.com" className="text-black underline">support@synsguiden.com</a>
             </p>
           </section>
 
@@ -98,7 +98,7 @@ export default function PrivatlivspolitikPage() {
               <li><strong>Indsigelse:</strong> Du kan gøre indsigelse mod visse former for behandling</li>
             </ul>
             <p className="text-gray-600 mt-4">
-              Kontakt os på <a href="mailto:support@synsapp.dk" className="text-black underline">support@synsapp.dk</a> for at udøve dine rettigheder.
+              Kontakt os på <a href="mailto:support@synsguiden.com" className="text-black underline">support@synsguiden.com</a> for at udøve dine rettigheder.
             </p>
           </section>
 
