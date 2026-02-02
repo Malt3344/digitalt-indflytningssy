@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
       .from('inspections')
       .select('is_paid, landlord_id')
       .eq('id', inspectionId)
-      .single()
+      .single() as { data: { is_paid: boolean; landlord_id: string } | null }
 
     if (!inspection || inspection.landlord_id !== user.id) {
       return NextResponse.json({ error: 'Ikke autoriseret' }, { status: 403 })
