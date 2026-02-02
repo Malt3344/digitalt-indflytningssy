@@ -76,6 +76,16 @@ export async function POST(req: NextRequest) {
 
     let customerId = profile?.stripe_customer_id
 
+    // Verify the customer exists in Stripe (handles switching between live/test mode)
+    if (customerId) {
+      try {
+        await stripe.customers.retrieve(customerId)
+      } catch {
+        // Customer doesn't exist in current Stripe mode, create a new one
+        customerId = undefined
+      }
+    }
+
     if (!customerId) {
       // Get user email from authenticated user
       const userEmail = user.email || profile?.email || 'user@example.com'

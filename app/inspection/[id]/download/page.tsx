@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { generatePDF } from '@/lib/pdf-generator'
 import { isAdminEmail } from '@/lib/admin-config'
@@ -9,10 +9,12 @@ import { isAdminEmail } from '@/lib/admin-config'
 export default function DownloadPage() {
   const params = useParams()
   const router = useRouter()
-  const [status, setStatus] = useState<'loading' | 'downloading' | 'success' | 'error'>('loading')
+  const searchParams = useSearchParams()
+  const [status, setStatus] = useState<'loading' | 'verifying' | 'downloading' | 'success' | 'error'>('loading')
   const [error, setError] = useState<string | null>(null)
 
   const inspectionId = params.id as string
+  const paymentSuccess = searchParams.get('payment') === 'success'
 
   useEffect(() => {
     handleDownload()
@@ -25,6 +27,32 @@ export default function DownloadPage() {
       if (!user) {
         router.push('/auth/login')
         return
+      }
+
+      // If coming from successful payment, verify it first
+      if (paymentSuccess) {
+        setStatus('verifying')
+        try {
+          const response = await fetch('/api/stripe/verify-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ inspectionId }),
+          })
+          const result = await response.json()
+          if (!result.verified) {
+            // Payment not found yet, might take a moment
+            await new Promise(resolve => setTimeout(resolve, 2000))
+            // Try one more time
+            const retryResponse = await fetch('/api/stripe/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ inspectionId }),
+            })
+            await retryResponse.json()
+          }
+        } catch (e) {
+          console.error('Error verifying payment:', e)
+        }
       }
 
       // Fetch inspection and verify payment
