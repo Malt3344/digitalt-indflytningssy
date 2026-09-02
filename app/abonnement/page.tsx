@@ -62,7 +62,7 @@ export default function KontoPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-2 border-gray-300 border-t-black"></div>
+        <div className="animate-spin rounded-full h-10 w-10 border-2 border-line border-t-brand-700"></div>
       </div>
     )
   }
@@ -72,41 +72,41 @@ export default function KontoPage() {
       <Navigation />
 
       <main className="max-w-2xl mx-auto px-4 py-6 pb-24">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Konto</h1>
+        <h1 className="text-2xl font-bold text-ink mb-6">Konto</h1>
 
         {/* User info */}
-        <div className="bg-gray-50 rounded-xl p-4 mb-6">
-          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+        <div className="card p-4 mb-6">
+          <h2 className="section-title mb-2">
             Email
           </h2>
-          <p className="text-gray-900 font-medium">{user?.email}</p>
+          <p className="text-ink font-medium">{user?.email}</p>
         </div>
 
         {/* Stats */}
         {stats && (
           <div className="grid grid-cols-2 gap-4 mb-8">
-            <div className="bg-gray-50 rounded-xl p-4 text-center">
-              <p className="text-3xl font-bold text-gray-900">{stats.totalInspections}</p>
-              <p className="text-sm text-gray-500">Syn i alt</p>
+            <div className="card p-4 text-center">
+              <p className="text-3xl font-bold text-ink">{stats.totalInspections}</p>
+              <p className="text-sm text-ink-muted">Syn i alt</p>
             </div>
-            <div className="bg-green-50 rounded-xl p-4 text-center">
-              <p className="text-3xl font-bold text-green-700">{stats.paidInspections}</p>
-              <p className="text-sm text-green-600">Downloadet</p>
+            <div className="rounded-xl border border-success-100 bg-success-50 p-4 text-center">
+              <p className="text-3xl font-bold text-success-700">{stats.paidInspections}</p>
+              <p className="text-sm text-success-600">Downloadet</p>
             </div>
           </div>
         )}
 
         {/* Pricing info */}
-        <div className="bg-gray-50 rounded-xl p-4 mb-8">
-          <h2 className="text-sm font-semibold text-gray-900 mb-2">Priser</h2>
-          <div className="space-y-2 text-sm text-gray-600">
+        <div className="card p-4 mb-8">
+          <h2 className="text-sm font-semibold text-ink mb-2">Priser</h2>
+          <div className="space-y-2 text-sm text-ink-soft">
             <div className="flex justify-between">
               <span>Første synsrapport</span>
-              <span className="font-medium text-green-600">Gratis</span>
+              <span className="font-medium text-success-600">Gratis</span>
             </div>
             <div className="flex justify-between">
               <span>Efterfølgende synsrapporter</span>
-              <span className="font-medium text-gray-900">149 kr/stk</span>
+              <span className="font-medium text-ink">149 kr/stk</span>
             </div>
           </div>
         </div>
@@ -115,14 +115,14 @@ export default function KontoPage() {
         <div className="space-y-3">
           <button
             onClick={() => router.push('/inspection/new')}
-            className="w-full bg-black text-white py-4 rounded-xl font-semibold active:bg-gray-800"
+            className="btn-primary btn-lg w-full"
           >
             + Nyt indflytningssyn
           </button>
 
           <button
             onClick={handleLogout}
-            className="w-full bg-gray-100 text-gray-700 py-3 rounded-xl font-medium active:bg-gray-200"
+            className="btn-ghost btn-md w-full py-3"
           >
             Log ud
           </button>

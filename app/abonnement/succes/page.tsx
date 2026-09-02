@@ -8,23 +8,23 @@ function SuccessContent() {
   const router = useRouter()
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-4">
-      <div className="bg-gray-50 rounded-2xl p-8 max-w-md text-center">
+    <div className="min-h-screen bg-surface-soft flex items-center justify-center px-4">
+      <div className="card-elevated p-8 max-w-md text-center">
         <div className="mb-6 flex justify-center">
-          <CheckCircle className="text-green-500" size={64} />
+          <CheckCircle className="text-success-600" size={56} />
         </div>
-        
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">
+
+        <h1 className="text-2xl font-bold tracking-tightish text-ink mb-3">
           Betaling gennemført!
         </h1>
-        
-        <p className="text-gray-600 mb-6">
+
+        <p className="text-ink-soft mb-6">
           Din synsrapport er nu klar til download.
         </p>
 
         <button
           onClick={() => router.push('/')}
-          className="w-full bg-black text-white py-3 px-6 rounded-xl font-semibold active:bg-gray-800"
+          className="btn-primary btn-lg w-full"
         >
           Tilbage til forsiden
         </button>
@@ -37,7 +37,7 @@ export default function SuccessPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-2 border-gray-300 border-t-black"></div>
+        <div className="animate-spin rounded-full h-10 w-10 border-2 border-line border-t-brand-700"></div>
       </div>
     }>
       <SuccessContent />

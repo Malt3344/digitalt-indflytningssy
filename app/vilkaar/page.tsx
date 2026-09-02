@@ -1,4 +1,6 @@
 import { Metadata } from 'next'
+import SiteHeader from '@/components/marketing/SiteHeader'
+import SiteFooter from '@/components/marketing/SiteFooter'
 
 export const metadata: Metadata = {
   title: 'Handelsbetingelser | Synsguiden',
@@ -8,15 +10,14 @@ export const metadata: Metadata = {
 export default function VilkaarPage() {
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-3xl mx-auto px-4 py-12">
-        <a href="/" className="text-gray-500 hover:text-black text-sm mb-6 inline-block">
-          ← Tilbage til forsiden
-        </a>
-        
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Handelsbetingelser</h1>
-        
-        <div className="prose prose-gray max-w-none">
-          <p className="text-gray-600 mb-6">
+      <SiteHeader />
+
+      <div className="container-page max-w-3xl py-14 lg:py-20">
+        <p className="eyebrow">Juridisk</p>
+        <h1 className="mt-3 text-4xl font-bold tracking-tightish text-ink">Handelsbetingelser</h1>
+
+        <div className="legal-content mt-8">
+          <p className="text-sm text-ink-muted">
             Sidst opdateret: {new Date().toLocaleDateString('da-DK', { day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
 
@@ -141,6 +142,8 @@ export default function VilkaarPage() {
           </section>
         </div>
       </div>
+
+      <SiteFooter />
     </div>
   )
 }
